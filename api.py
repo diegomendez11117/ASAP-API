@@ -17,7 +17,27 @@ def is_valid_uuid(value):
 
 @app.route('/member_id', methods=['POST'])
 def add():
-    return "member_id : " + format(str(uuid.uuid4()))
+    request_data = request.get_json()
+    if ((request_data['first_name'] is None) and (request_data['last_name'] is None) and (request_data['dob'] is None) \
+            and (request_data['country'] is None)):
+        response = make_response(
+            jsonify(
+                {"Error": str("Review the parameters sent"), "severity": "danger"}
+            ),
+            403,
+        )
+        response.headers["Content-Type"] = "application/json"
+        return response
+
+    else:
+        response = make_response(
+            jsonify(
+                {"member_id": str(uuid.uuid4())}
+            ),
+            200,
+        )
+        response.headers["Content-Type"] = "application/json"
+        return response
 
 
 @app.route('/member_id/validate/', methods=['GET', 'POST'])
@@ -36,12 +56,11 @@ def validate():
     else:
         response = make_response(
             jsonify(
-                {"message": str("VALIDATION ERROR"), "severity": "danger"}
+                {"Error": str("VALIDATION ERROR"), "severity": "danger"}
             ),
-            401,
+            403,
         )
         response.headers["Content-Type"] = "application/html"
         return response
-
 
 app.run()
